@@ -686,6 +686,7 @@ class QuickSettings {
                     immersiveTile.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            collapsePanels();
                             boolean immersiveModeOn = Settings.System.getInt(mContext
                                     .getContentResolver(), Settings.System.IMMERSIVE_MODE, 0) == 1;
                             immersiveTile.setImageResource(immersiveModeOn
