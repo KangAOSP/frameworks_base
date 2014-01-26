@@ -662,11 +662,13 @@ class QuickSettings {
                         if(addMissing) rotationLockTile.setVisibility(View.GONE);
                     }
 
+
                 } else if(Tile.BATTERY.toString().equals(tile.toString())) { // Battery
                     final QuickSettingsTileView batteryTile = (QuickSettingsTileView)
                             inflater.inflate(R.layout.quick_settings_tile, parent, false);
                     batteryTile.setTileId(Tile.BATTERY);
                     batteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
+
 
                     batteryTile.setOnClickListener(new View.OnClickListener() {
                         @Override
