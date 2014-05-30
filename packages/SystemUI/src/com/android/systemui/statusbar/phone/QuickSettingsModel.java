@@ -173,6 +173,21 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             }
 
             onUsbChanged();
+
+
+ 	}
+    };
+
+    /** Broadcast receive to determine if device boot is complete*/
+    private BroadcastReceiver mBootReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                refreshMobileNetworkTile();
+            }
+            context.unregisterReceiver(mBootReceiver);
+
         }
     };
 
@@ -242,7 +257,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         }
 
         @Override public void onChange(boolean selfChange) {
-            onLteChanged();
             onMobileNetworkChanged();
         }
 
@@ -344,6 +358,9 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private String[] mUsbRegexs;
     private ConnectivityManager mCM;
 
+    private final NetworkObserver mMobileNetworkObserver;
+
+
     private final MediaRouter mMediaRouter;
     private final RemoteDisplayRouteCallback mRemoteDisplayRouteCallback;
 
@@ -431,9 +448,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
 
 
 
+
     protected QuickSettingsTileView mLteTile;
     private RefreshCallback mLteCallback;
     protected State mLteState = new State();
+
+
 
     private QuickSettingsTileView mMobileNetworkTile;
     private RefreshCallback mMobileNetworkCallback;
@@ -475,8 +495,6 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mBugreportObserver.startObserving();
         mBrightnessObserver = new BrightnessObserver(mHandler);
         mBrightnessObserver.startObserving();
-        mLteObserver = new NetworkObserver(mHandler);
-        mLteObserver.startObserving();
         mMobileNetworkObserver = new NetworkObserver(mHandler);
         mMobileNetworkObserver.startObserving();
         mSleepTimeObserver = new SleepTimeObserver(mHandler);
@@ -527,7 +545,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         refreshRssiTile();
         refreshLocationTile();
 
+
         refreshLteTile();
+
+
         refreshMobileNetworkTile();
         refreshSleepTimeTile();
         refreshLocationExtraTile();
@@ -768,6 +789,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
 
+
     // LTE
     void addLteTile(QuickSettingsTileView view, RefreshCallback cb) {
         mLteTile = view;
@@ -797,6 +819,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         onLteChanged();
     }
 
+
+
     // Mobile Network
     void addMobileNetworkTile(QuickSettingsTileView view, RefreshCallback cb) {
         mMobileNetworkTile = view;
@@ -805,7 +829,12 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
 
     void onMobileNetworkChanged() {
-        mMobileNetworkCallback.refreshView(mMobileNetworkTile, mMobileNetworkState);
+        if (deviceHasMobileData()) {
+            mMobileNetworkState.label = getNetworkType(mContext.getResources());
+            mMobileNetworkState.iconId = getNetworkTypeIcon();
+            mMobileNetworkState.enabled = true;
+            mMobileNetworkCallback.refreshView(mMobileNetworkTile, mMobileNetworkState);
+        }
     }
 
     void refreshMobileNetworkTile() {
