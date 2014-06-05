@@ -326,6 +326,18 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
+
+    private void updateBatteryIcons() {
+        if (mQS != null) {
+            mQS.updateBattery();
+        }
+        if (mBattery != null && mCircleBattery != null) {
+            mBattery.updateSettings();
+            mCircleBattery.updateSettings();
+        }
+    }
+
+
     private int mInteractingWindows;
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
@@ -370,6 +382,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     Settings.Global.getUriFor(SETTING_HEADS_UP), true,
                     mHeadsUpObserver);
         }
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.STATUS_BAR_BATTERY_STYLE),
+                        false, new ContentObserver(new Handler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                updateBatteryIcons();
+            }
+        });
+
     }
 
     // ================================================================================
