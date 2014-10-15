@@ -23,8 +23,8 @@
     <!-- QuickSettings: Immersive global mode (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_immersive_global_off_label">Immersive Off</string>
     <!-- QuickSettings: Immersive active modes [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_immersive_mode_off_label">Disabled</string>
-    <string name="quick_settings_immersive_mode_full_label">Full</string>
+
+    
 
     <string name="quick_settings_immersive_mode_no_status_bar_label">Navigation bar</string>
     <string name="quick_settings_immersive_mode_no_navigation_bar_label">Status bar</string>
@@ -42,8 +42,8 @@
     <string name="quick_settings_network_disabled">Disabled</string>
     <string name="quick_settings_network_toast_disabled">Network settings are not available</string>
     <!-- QuickSettings: USB Tether Tile [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_usb_tether_connected_label">USB Tethering Off</string>
-    <string name="quick_settings_usb_tether_on_label">USB Tethering</string>
+
+
     <!-- QuickSettings: Sleep Tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_sleep_action_label">Sleep</string>
     <string name="quick_settings_sleep_time_15_label">15 seconds</string>
