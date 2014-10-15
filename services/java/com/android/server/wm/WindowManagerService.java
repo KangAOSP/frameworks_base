@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2007 The Android Open Source Project
+ * This code has been modified. Portions copyright (C) 2013, ParanoidAndroid Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -436,7 +437,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-    boolean mAltOrientation = false;
+    
+
+
     class RotationWatcher {
         IRotationWatcher watcher;
         IBinder.DeathRecipient dr;
@@ -446,6 +449,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
     ArrayList<RotationWatcher> mRotationWatchers = new ArrayList<RotationWatcher>();
+
+
+
+            = new ArrayList<IRotationWatcher>();
     int mDeferredRotationPauseCount;
 
     int mSystemDecorLayer = 0;
@@ -2380,11 +2387,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void removeWindowLocked(Session session, WindowState win) {
+
         removeWindowLocked(session, win, false);
     }
 
     private void removeWindowLocked(Session session, WindowState win,
             boolean forceRemove) {
+
+
         if (win.mAttrs.type == TYPE_APPLICATION_STARTING) {
             if (DEBUG_STARTING_WINDOW) Slog.d(TAG, "Starting window removed " + win);
             removeStartingWindowTimeout(win.mAppToken);
@@ -3201,8 +3211,15 @@ public class WindowManagerService extends IWindowManager.Stub
         // is running.
         if (okToDisplay()) {
             DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
-            final int width = displayInfo.appWidth;
-            final int height = displayInfo.appHeight;
+            final int width;
+            final int height;
+            if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                width = displayInfo.logicalWidth;
+                height = displayInfo.logicalHeight;
+            } else {
+                width = displayInfo.appWidth;
+                height = displayInfo.appHeight;
+            }
             if (DEBUG_APP_TRANSITIONS || DEBUG_ANIM) Slog.v(TAG, "applyAnimation: atoken="
                     + atoken);
             Animation a = mAppTransition.loadAnimation(lp, transit, enter, width, height);
@@ -5195,18 +5212,24 @@ public class WindowManagerService extends IWindowManager.Stub
         ShutdownThread.rebootSafeMode(mContext, confirm);
     }
 
+    // Called by window manager policy.  Not exposed externally.
     @Override
-
-    public void rebootTile() {
-        ShutdownThread.reboot(mContext, null, true);
+    public void reboot(boolean confirm) {
+        reboot(null, confirm);
     }
 
+    // Called by window manager policy.  Not exposed externally.
     @Override
     public void reboot(String reason, boolean confirm) {
         ShutdownThread.reboot(mContext, reason, confirm);
     }
 
 
+    // Called by window manager policy.  Not exposed externally.
+    @Override
+    public void rebootTile() {
+        ShutdownThread.reboot(mContext, null, true);
+    }
 
     public void setInputFilter(IInputFilter filter) {
         if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
@@ -5646,11 +5669,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             ws.isDisplayedLw()) {
                         screenshotReady = true;
                     }
-
-                    if (fullscreen) {
-                        // No point in continuing down through windows.
-                        break;
-                    }
                 }
 
                 if (appToken != null && appWin == null) {
@@ -6017,7 +6035,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         for (int i=mRotationWatchers.size()-1; i>=0; i--) {
             try {
-                mRotationWatchers.get(i).watcher.onRotationChanged(rotation);
+		mRotationWatchers.get(i).watcher.onRotationChanged(rotation);
             } catch (RemoteException e) {
             }
         }
@@ -6049,8 +6067,14 @@ public class WindowManagerService extends IWindowManager.Stub
             public void binderDied() {
                 synchronized (mWindowMap) {
                     for (int i=0; i<mRotationWatchers.size(); i++) {
+                        
+
+
                         if (watcherBinder == mRotationWatchers.get(i).watcher.asBinder()) {
                             RotationWatcher removed = mRotationWatchers.remove(i);
+
+
+
                             if (removed != null) {
                                 removed.watcher.asBinder().unlinkToDeath(this, 0);
                             }
@@ -6078,13 +6102,19 @@ public class WindowManagerService extends IWindowManager.Stub
         final IBinder watcherBinder = watcher.asBinder();
         synchronized (mWindowMap) {
             for (int i=0; i<mRotationWatchers.size(); i++) {
+
+
+
                 RotationWatcher rotationWatcher = mRotationWatchers.get(i);
                 if (watcherBinder == rotationWatcher.watcher.asBinder()) {
                     RotationWatcher removed = mRotationWatchers.remove(i);
                     if (removed != null) {
                         removed.watcher.asBinder().unlinkToDeath(removed.dr, 0);
                         i--;
-                    }
+            
+
+
+
                 }
             }
         }
@@ -8656,8 +8686,17 @@ public class WindowManagerService extends IWindowManager.Stub
                     drawSurface.release();
                     appAnimator.thumbnailLayer = topOpeningLayer;
                     DisplayInfo displayInfo = getDefaultDisplayInfoLocked();
+                    final int width;
+                    final int height;
+                    if (mPolicy.isImmersiveMode(mLastStatusBarVisibility)) {
+                        width = displayInfo.logicalWidth;
+                        height = displayInfo.logicalHeight;
+                    } else {
+                        width = displayInfo.appWidth;
+                        height = displayInfo.appHeight;
+                    }
                     Animation anim = mAppTransition.createThumbnailAnimationLocked(
-                            transit, true, true, displayInfo.appWidth, displayInfo.appHeight);
+                            transit, true, true, width, height);
                     appAnimator.thumbnailAnimation = anim;
                     anim.restrictDuration(MAX_ANIMATION_DURATION);
                     anim.scaleCurrentDuration(mTransitionAnimationScale);
@@ -10868,7 +10907,10 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowList windows = displayContent.getWindowList();
             while (!windows.isEmpty()) {
                 final WindowState win = windows.get(windows.size() - 1);
-                removeWindowLocked(win.mSession, win, true);
+                
+
+			removeWindowLocked(win.mSession, win, true);
+
             }
         }
         mAnimator.removeDisplayLocked(displayId);
