@@ -5196,18 +5196,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-
-    public void rebootTile() {
-        ShutdownThread.reboot(mContext, null, true);
-    }
-
-    @Override
-    public void reboot(String reason, boolean confirm) {
-        ShutdownThread.reboot(mContext, reason, confirm);
-    }
-
-
-
     public void setInputFilter(IInputFilter filter) {
         if (!checkCallingPermission(android.Manifest.permission.FILTER_EVENTS, "setInputFilter()")) {
             throw new SecurityException("Requires FILTER_EVENTS permission");
@@ -10889,10 +10877,5 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public Object getWindowManagerLock() {
         return mWindowMap;
-    }
-
-    @Override
-    public void addSystemUIVisibilityFlag(int flag) {
-        mLastStatusBarVisibility |= flag;
     }
 }
